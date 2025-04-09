@@ -1,0 +1,22 @@
+.ui-slider {
+    position: relative;
+    height: 6px;
+    background: #444;
+    border-radius: 3px;
+}
+
+.ui-slider-handle {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.ui-widget-content {
+    border: 1px solid #555;
+    background: #333;
+    color: #fff;
+}

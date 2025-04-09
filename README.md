@@ -6,31 +6,36 @@
 
 ## 项目结构说明
 
-| 路径                     | 功能说明                                                     |
-| ------------------------ | ------------------------------------------------------------ |
-| public/                  | 静态资源目录（直接复制到构建输出目录，不会被 Webpack 处理）  |
-| ├── index.html           | 主 HTML 文件，引入 Potree/Three.js 的 CDN 并挂载 Vue 应用    |
-| └── pointclouds/         | 存放点云文件（.las/.ply），示例文件 example.las 可用于测试   |
-| src/                     | 核心代码目录                                                 |
-| ├── assets/              | 静态资源（CSS/图片/字体等）                                  |
-| ├── components/          | Vue 组件                                                     |
-| │ ├── PotreeViewer.vue   | Potree 点云渲染容器，负责加载和显示点云                      |
-| │ ├── RosConnection.vue  | ROS 连接管理组件，处理与 rosbridge 的 WebSocket 通信         |
-| │ └── Toolbar.vue        | 操作工具栏（如点云滤波、测量、视角控制）                     |
-| ├── composables/         | Vue3 组合式 API 逻辑复用                                     |
-| │ ├── usePotree.js       | 封装 Potree 初始化、点云加载方法                             |
-| │ └── useRos.js          | 封装 ROS 连接、Topic 订阅/发布逻辑                           |
-| ├── stores/              | Pinia 状态管理                                               |
-| │ └── pointCloudStore.js | 全局状态：存储点云列表、当前激活的点云、滤镜参数等           |
-| ├── utils/               | 工具函数                                                     |
-| │ ├── pointCloudUtils.js | 点云数据处理（降采样、法向量计算、格式转换）                 |
-| │ └── rosUtils.js        | ROS 消息解析（如 sensor_msgs/PointCloud2 → Potree 可识别的格式） |
-| ├── views/               | 页面级组件                                                   |
-| │ └── HomeView.vue       | 主页面，整合 Potree 渲染器、ROS 连接和工具栏                 |
-| ├── App.vue              | 根组件，定义全局布局                                         |
-| └── main.js              | 应用入口，初始化 Vue/Pinia/ROS                               |
-| .env                     | 环境变量（如 VITE_ROS_WS_URL=ws://localhost:9090）           |
-| vite.config.js           | Vite 构建配置（优化 Three.js/Potree 依赖）                   |
+| 路径                         | 功能说明                                                |
+|----------------------------|-----------------------------------------------------|
+| public/                    | 静态资源目录（直接复制到构建输出目录，不会被 Webpack 处理）                  |
+| └── converted_pointclouds/ | 存放点云文件（.las/.ply）                                   |
+  | ├── pointclouds/           | lion_takanawa.copc.laz所生成的metadata和octree等其他文件      |
+  | └── lion_takanawa.copc.laz | 用于做测试的点云文件                                          |
+| src/                       | 核心代码目录                                              |
+| ├── assets/                | 静态资源（CSS/图片/字体等）                                    |
+| ├── components/            | Vue 组件                                              |
+| │ ├── PotreeViewer         | Potree 点云渲染容器，负责加载和显示点云                             |
+| │    ├── index.vue         | Potree 点云渲染容器，负责加载和显示点云                             |
+| │    ├── Sidebar.ts        | Potree 点云渲染容器，负责加载和显示点云                             |
+| │ ├── RosConnection.vue    | ROS 连接管理组件，处理与 rosbridge 的 WebSocket 通信             |
+| │ └── Toolbar.vue          | 操作工具栏（如点云滤波、测量、视角控制）                                |
+| ├── composables/           | Vue3 组合式 API 逻辑复用                                   |
+| │ ├── usePotree.js         | 封装 Potree 初始化、点云加载方法                                |
+| │ └── useRos.js            | 封装 ROS 连接、Topic 订阅/发布逻辑                             |
+| ├── stores/                | Pinia 状态管理                                          |
+| │ └── pointCloudStore.js   | 全局状态：存储点云列表、当前激活的点云、滤镜参数等                           |
+| ├── utils/                 | 工具函数                                                |
+| │ ├── pointCloudUtils.js   | 点云数据处理（降采样、法向量计算、格式转换）                              |
+| │ └── rosUtils.js          | ROS 消息解析（如 sensor_msgs/PointCloud2 → Potree 可识别的格式） |
+| ├── views/                 | 页面级组件                                               |
+| │ └── HomeView.vue         | 主页面，整合 Potree 渲染器、ROS 连接和工具栏                        |
+| ├── App.vue                | 根组件，定义全局布局                                          |
+| └── main.js                | 应用入口，初始化 Vue/Pinia/ROS                              |
+| .env                       | 环境变量（如 VITE_ROS_WS_URL=ws://localhost:9090）         |
+| index.html                 | 主 HTML 文件，引入 Potree/Three.js 的 CDN 并挂载 Vue 应用       |
+| vite.config.js             | Vite 构建配置（优化 Three.js/Potree 依赖）                    |
+| package.json               | 配置文件                                                |
 
 ---
 

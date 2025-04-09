@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Potree Viewer</title>
+    <!-- Potree 核心资源 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/potree@1.7/build/potree/potree.css">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/potree@1.7/build/potree/potree.js"></script>
+    <!-- TWEEN/i18next 等依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/tween.js@18.5.17/dist/tween.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next@21.6.10/dist/umd/i18next.min.js"></script>
+    <!-- 在index.html中添加 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/potree@1.7/build/potree/potree.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/potree-core@1.7/dist/potree.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.umd.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.js"></script>
+
+<script>
+    // 暴露全局对象供Vue组件使用
+    window.Potree = Potree;
+    window.THREE = THREE;
+    window.TWEEN = TWEEN;
+    window.i18next = i18next;
+</script>
+</body>
+</html>

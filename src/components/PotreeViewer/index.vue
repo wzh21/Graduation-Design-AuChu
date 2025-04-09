@@ -1,108 +1,115 @@
-<template>
-  <div class="potree-container">
-    <div :id="`potree_render_area${areaIdIndex}`" ref="container"></div>
-  </div>
-</template>
-
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import Sidebar from './Sidebar'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { usePointCloudStore } from '@/stores/pointCloudStore'
 
-// 全局引用
 const Potree = window.Potree
 const THREE = window.THREE
 
 const props = defineProps({
-  areaIdIndex: {
+  areaId: {
     type: String,
-    default: ''
+    default: 'default'
   }
 })
 
+const viewerContainer = ref(null)
 const viewer = ref(null)
-let sidebar = null
+const sidebar = ref(null)
+const pointCloudStore = usePointCloudStore()
 
-// 初始化Viewer
+// 初始化查看器
 const initViewer = () => {
-  viewer.value = new Potree.Viewer(
-      document.getElementById(`potree_render_area${props.areaIdIndex}`),
-      {
-        noDragAndDrop: true,
-        language: 'zh'
-      }
-  )
+  if (!Potree || viewer.value) return
 
-  const rawViewer = viewer.value
-  rawViewer.setClipTask(Potree.ClipTask.SHOW_INSIDE)
-  rawViewer.setEDLEnabled(false)
-  rawViewer.setFOV(60)
-  rawViewer.setPointBudget(50 * 1000 * 1000)
-  rawViewer.setBackground('black')
-  rawViewer.setDescription('')
-  rawViewer.setMinNodeSize(0)
-  rawViewer.setControls(rawViewer.earthControls)
+  viewer.value = new Potree.Viewer(viewerContainer.value, {
+    noDragAndDrop: true
+  })
+
+  // 基本配置
+  viewer.value.setClipTask(Potree.ClipTask.SHOW_INSIDE)
+  viewer.value.setEDLEnabled(false)
+  viewer.value.setFOV(60)
+  viewer.value.setPointBudget(50 * 1000 * 1000)
+  viewer.value.setBackground('black')
+  viewer.value.setDescription('')
+  viewer.value.setMinNodeSize(0)
+  viewer.value.setControls(viewer.value.earthControls)
 
   // 初始化侧边栏
-  sidebar = new Sidebar(rawViewer)
-  sidebar.init()
+  sidebar.value = new Sidebar(viewer.value)
+  sidebar.value.init()
 
-  console.log('Potree Viewer initialized')
+  console.log('Potree viewer initialized')
 }
 
 // 加载点云
-const loadPointCloud = (path) => {
-  return new Promise((resolve) => {
-    Potree.loadPointCloud(path).then((e) => {
-      const pointcloud = e.pointcloud
-      const material = pointcloud.material
+const loadPointCloud = async (path) => {
+  if (!viewer.value) return
 
-      // 检查颜色属性
-      const hasRGBA = pointcloud.getAttributes().attributes.some(a => a.name === 'rgba')
-      material.activeAttributeName = hasRGBA ? 'rgba' : 'color'
+  try {
+    const result = await Potree.loadPointCloud(
+        path,
+        path.split('/').pop().split('.')[0]
+    )
 
-      // 材质设置
-      material.size = 1
-      material.minSize = 1
-      material.maxSize = 16
-      material.pointSizeType = Potree.PointSizeType.FIXED
-      material.gradient = Potree.Gradients.TURBO
+    const pointcloud = result.pointcloud
+    const material = pointcloud.material
 
-      // 添加到场景
-      viewer.value.scene.addPointCloud(pointcloud)
-      viewer.value.zoomTo(pointcloud)
+    // 检查颜色属性
+    const hasRGBA = pointcloud.getAttributes().attributes.find(a => a.name === 'rgba') !== undefined
+    material.activeAttributeName = hasRGBA ? 'rgba' : 'color'
 
-      // 加载元数据
-      fetch(path)
-          .then(res => res.json())
-          .then(metadata => {
-            pointcloud.name = metadata.name
-            pointcloud.pointBudget = metadata.points
-            viewer.value.scene.view.setView(
-                new THREE.Vector3(6.44, -6.70, 5.52),
-                new THREE.Vector3(-0.53, 0.55, -0.63)
-            )
-          })
+    // 设置材质
+    material.size = 1
+    material.minSize = 1
+    material.maxSize = 16
+    material.pointSizeType = Potree.PointSizeType.FIXED
+    material.gradient = Potree.Gradients.TURBO
 
-      resolve(pointcloud)
-    })
-  })
+    // 添加到场景
+    viewer.value.scene.addPointCloud(pointcloud)
+    viewer.value.fitToScreen()
+
+    return pointcloud
+  } catch (error) {
+    console.error('Failed to load point cloud:', error)
+    return null
+  }
 }
+
+// 监听当前点云变化
+watch(() => pointCloudStore.currentPointCloud, async (newVal) => {
+  if (newVal && viewer.value) {
+    await loadPointCloud(newVal.url)
+  }
+})
 
 onMounted(() => {
   initViewer()
+
+  // 初始加载点云
+  if (pointCloudStore.currentPointCloud) {
+    loadPointCloud(pointCloudStore.currentPointCloud.url)
+  }
 })
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
   if (viewer.value) {
     viewer.value.dispose()
   }
 })
-
-defineExpose({ loadPointCloud })
 </script>
 
+<template>
+  <div
+      ref="viewerContainer"
+      class="potree-viewer"
+      :id="`potree_render_area${areaId}`"
+  ></div>
+</template>
+
 <style scoped>
-.potree-container {
+.potree-viewer {
   width: 100%;
   height: 100vh;
   position: relative;
